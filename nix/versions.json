@@ -1,0 +1,42 @@
+{
+  "slssteam": {
+    "owner": "AceSLS",
+    "repo": "SLSsteam",
+    "tag": "20261112130346",
+    "version": "20261112130346",
+    "asset": "SLSsteam-Any-release.7z",
+    "hash": "sha256-jfbAF5PwnlqFdRa58MHgvqz7mW+xKNjqxt5sWFlK/TY="
+  },
+  "slsteam-moon": {
+    "owner": "swwayps",
+    "repo": "slsteam-moon",
+    "tag": "v2.9",
+    "version": "2.9",
+    "asset": "slsteam-moon-linux-{ver}-lumen.zip",
+    "hash": "sha256-wF0jKMmQJnMpXNdsLimdyFOrdg/UcNZ9FTd+XBCZXHI="
+  },
+  "lumen": {
+    "owner": "swwayps",
+    "repo": "lumen",
+    "tag": "v2.9",
+    "version": "2.9",
+    "asset": "lumen-linux.zip",
+    "hash": "sha256-eqDLf7am3cc7jVSN4/Tw1Y020Vi+DKj+MjcN0Q5B2qc="
+  },
+  "luatools": {
+    "owner": "swwayps",
+    "repo": "luatools-moon",
+    "tag": "v2.9",
+    "version": "2.9",
+    "asset": "luatools-linux.zip",
+    "hash": "sha256-9N22fGa+ZhCINIhWNHZ89p589UKqfBIeoX9h0f78Ta4="
+  },
+  "assella": {
+    "owner": "niwia",
+    "repo": "ASSella",
+    "tag": "v3.1.1",
+    "version": "3.1.1",
+    "asset": "ASSella.AppImage",
+    "hash": "sha256-3gkK1vIdQAsuX/t/WaGUOHeB7+EYYj/EmJNxVkft9ns="
+  }
+}

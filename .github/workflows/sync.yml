@@ -1,0 +1,43 @@
+name: sync
+
+on:
+  schedule:
+    - cron: "37 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: DeterminateSystems/nix-installer-action@f8d9b70f15d58527ddad294092d885d3bda9adf
+      - uses: DeterminateSystems/magic-nix-cache-action@5d57db48d0933cea37f35fbbbcdaf8b554b11d
+      - name: Refresh versions.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./ci/update-versions.sh
+      - name: Check builds still pass
+        run: |
+          nix flake update
+          nix flake check --print-build-logs
+          nix build .#slssteam .#slsteam-moon .#lumen .#luatools .#assella
+      - name: Open update PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if git diff --quiet; then
+            echo "nothing to update"
+            exit 0
+          fi
+          BR="chore/weekly-upstream"
+          git checkout -B "$BR"
+          git add nix/versions.json flake.lock
+          git -c user.name="github-actions[bot]" -c user.email="github-actions[bot]@users.noreply.github.com" \
+            commit -m "chore: bump upstream versions"
+          git push -f origin "$BR"
+          gh pr create --fill --head "$BR" || gh pr edit "$BR" --add-label dependencies || true

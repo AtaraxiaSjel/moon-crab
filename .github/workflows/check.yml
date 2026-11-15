@@ -1,0 +1,18 @@
+name: check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: DeterminateSystems/nix-installer-action@f8d9b70f15d58527ddad294092d885d3bda9adf
+      - uses: DeterminateSystems/magic-nix-cache-action@5d57db48d0933cea37f35fbbbcdaf8b554b11d
+      - run: nix flake check --print-build-logs
+      - run: |
+          nix fmt
+          git diff --exit-code
