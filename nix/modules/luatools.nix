@@ -24,15 +24,20 @@ let
   plugin = luatools pkgs;
   entry = lumen pkgs;
 
-  # The steam-run shim stands in for the raw Lumen binary (which needs the
-  # FHS sandbox on NixOS). A store file, not a heredoc: copied verbatim into
-  # the install dir, so no Nix-string reindentation can ever break it.
+  # `~/.local/share/Lumen/lumen` execs the raw binary NATIVELY (not via
+  # steam-run): Lumen's peerauth must resolve the CEF listener's owner through
+  # /proc/PID/{exe,fd}, and inside steam-run those readlinks fail, so it
+  # refuses to attach ("owner unknown") and no menu button appears. The
+  # 32-bit loader env is still dropped — it carries the slsteam-moon hooks,
+  # which would give 64-bit lumen.bin "wrong ELF class". A store file, not
+  # a heredoc: copied verbatim into the install dir, so no Nix-string
+  # reindentation can ever break it.
   shim = pkgs.writeText "lumen" ''
     #!/bin/sh
     cd "$(dirname "$0")" || exit 1
     export LUMEN_BACKEND_DIR="$PWD/luatools/backend"
     export LUMEN_LUA_DIR="$PWD/lua"
-    exec steam-run env -u LD_AUDIT -u LD_PRELOAD ./lumen.bin "$@"
+    exec env -u LD_AUDIT -u LD_PRELOAD ./lumen.bin "$@"
   '';
 
   dir = "${target.home}/.local/share/Lumen";
