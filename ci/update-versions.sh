@@ -86,6 +86,19 @@ set_entry "slsteam-moon" "$(jq -n \
   '{owner:"swwayps",repo:"slsteam-moon",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
 echo "slsteam-moon: $MOON_TAG $MOON_REV $MOON_HASH"
 
+# slsteam-moon-x64 is a source build too: pin the latest release tag's commit
+# rev + its NAR hash. Kept separate from slsteam-moon so the 32-bit pin stays
+# put as the instant rollback while upstream catches up.
+MOONX64_TAG="$(latest_tag ogb4n/slsteam-moon-x64)"
+MOONX64_VER="${MOONX64_TAG#v}"
+MOONX64_REV="$(gh api "repos/ogb4n/slsteam-moon-x64/commits/$MOONX64_TAG" --jq .sha 2>/dev/null \
+  || curl -fsSL "https://api.github.com/repos/ogb4n/slsteam-moon-x64/commits/$MOONX64_TAG" | jq -r .sha)"
+MOONX64_HASH="$(rev_hash ogb4n/slsteam-moon-x64 "$MOONX64_REV")"
+set_entry "slsteam-moon-x64" "$(jq -n \
+  --arg tag "$MOONX64_TAG" --arg rev "$MOONX64_REV" --arg version "$MOONX64_VER" --arg hash "$MOONX64_HASH" \
+  '{owner:"ogb4n",repo:"slsteam-moon-x64",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
+echo "slsteam-moon-x64: $MOONX64_TAG $MOONX64_REV $MOONX64_HASH"
+
 if [ "${1:-}" = "--check" ]; then
   old_tmp="$(mktemp)"
   new_tmp="$(mktemp)"

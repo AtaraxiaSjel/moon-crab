@@ -15,6 +15,14 @@
     "version": "2.9",
     "hash": "sha256-C0WL3lZ2WRh/iGErL5PZ07yvuYXMRuz42xYmktmCYNc="
   },
+  "slsteam-moon-x64": {
+    "owner": "ogb4n",
+    "repo": "slsteam-moon-x64",
+    "tag": "v20261113203701",
+    "rev": "b0c0f8eb970a08f450641b8239ddca9cdac60e91",
+    "version": "20261113203701",
+    "hash": "sha256-CZP8p4CncfN7Z5S0JZLbwky/6Iq00XR3r/ZwFOr0C+o="
+  },
   "lumen": {
     "owner": "swwayps",
     "repo": "lumen",

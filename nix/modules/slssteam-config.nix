@@ -7,7 +7,11 @@
 # and FakeAppIds between switches — those keys are carried over from the live
 # file on every activation unless the user declared them (a declared key is
 # the user's, and resetting it is the point).
-{ slssteam, slsteamMoon }:
+{
+  slssteam,
+  slsteamMoon,
+  slsteamMoonX64,
+}:
 {
   config,
   lib,
@@ -18,7 +22,13 @@ let
   cfg = config.programs.moon-crab;
   target = import ../lib/target.nix { inherit config lib; };
 
-  active = if cfg.slssteam.flavor == "moon" then slsteamMoon pkgs else slssteam pkgs;
+  active =
+    if cfg.slssteam.flavor == "moon" then
+      slsteamMoon pkgs
+    else if cfg.slssteam.flavor == "moon-x64" then
+      slsteamMoonX64 pkgs
+    else
+      slssteam pkgs;
   forkDefault = active.defaultConfig;
 
   managed =

@@ -13,8 +13,8 @@ slsteam-moon fork), Lumen + LuaTools, and ASSella.
 
   programs.moon-crab = {
     slssteam.enable = true;
-    slssteam.flavor = "moon";   # or "upstream"
-    luatools.enable = true;     # needs flavor "moon"
+    slssteam.flavor = "moon-x64"; # "upstream" | "moon" (32-bit) | "moon-x64" (steamrt64)
+    luatools.enable = true;     # needs flavor "moon" or "moon-x64"
     assella = true;             # optional depot downloader
     slssteam.settings = {       # optional declarative config.yaml
       DisableCloud = true;
@@ -44,8 +44,9 @@ set `programs.moon-crab.user` explicitly.
 
 - Both SLSsteam builds compile from source (rev + NAR hash): upstream as a
   64-bit object, slsteam-moon as the two 32-bit objects with vendored static
-  libs. NEEDED stays minimal (pthread/dl + standard libs); curl resolves via
-  dlopen at runtime.
+  libs, slsteam-moon-x64 (ogb4n's 64-bit port for the steamrt64 client) as
+  one 64-bit object without library-inject.so. NEEDED stays minimal
+  (pthread/dl + standard libs); curl resolves via dlopen at runtime.
 - `programs.moon-crab.steam` is a small typed subset (enable/package/extraPkgs/
   extraEnv/extraBwrapArgs + freeform passthrough), shaped so a future
   steam-config-nix import can extend it without reshaping consumers.

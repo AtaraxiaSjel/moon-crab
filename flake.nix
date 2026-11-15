@@ -22,6 +22,7 @@
       builders = {
         slssteam = pkgs: pkgs.callPackage ./nix/packages/slssteam.nix { };
         slsteamMoon = pkgs: pkgs.callPackage ./nix/packages/slsteam-moon.nix { };
+        slsteamMoonX64 = pkgs: pkgs.callPackage ./nix/packages/slsteam-moon-x64.nix { };
         lumenDist = pkgs: pkgs.callPackage ./nix/packages/lumen-dist.nix { };
         luatools = pkgs: pkgs.callPackage ./nix/packages/luatools.nix { };
         lumen = pkgs: pkgs.callPackage ./nix/packages/lumen.nix { };
@@ -32,10 +33,10 @@
         imports = [
           ./nix/modules/options.nix
           (import ./nix/modules/slssteam.nix {
-            inherit (builders) slssteam slsteamMoon;
+            inherit (builders) slssteam slsteamMoon slsteamMoonX64;
           })
           (import ./nix/modules/slssteam-config.nix {
-            inherit (builders) slssteam slsteamMoon;
+            inherit (builders) slssteam slsteamMoon slsteamMoonX64;
           })
           (import ./nix/modules/luatools.nix {
             inherit (builders) lumenDist luatools lumen;
@@ -53,6 +54,7 @@
         {
           slssteam = builders.slssteam pkgs;
           slsteam-moon = builders.slsteamMoon pkgs;
+          slsteam-moon-x64 = builders.slsteamMoonX64 pkgs;
           lumen = builders.lumen pkgs;
           luatools = builders.luatools pkgs;
           lumen-dist = builders.lumenDist pkgs;
@@ -113,6 +115,14 @@
           badCombo = builtins.tryEval (
             (evalSystem { programs.moon-crab.luatools.enable = true; }).config.system.build.toplevel.drvPath
           );
+          fullMoonX64 = evalSystem {
+            programs.moon-crab.slssteam.enable = true;
+            programs.moon-crab.slssteam.flavor = "moon-x64";
+            programs.moon-crab.slssteam.settings = {
+              DisableCloud = true;
+            };
+            programs.moon-crab.luatools.enable = true;
+          };
         in
         {
           eval-bare-steam-off = expect "bare-steam-off" (
@@ -132,6 +142,20 @@
               (fullMoon.config.system.activationScripts ? "moon-crab-luatools")
               && (fullMoon.config.system.activationScripts ? "moon-crab-slssteam-config")
               && (fullMoon.config.system.activationScripts ? "moon-crab-assella")
+            then
+              "present"
+            else
+              ""
+          );
+          eval-x64-ld-audit = expect "x64-ld-audit" (
+            # Same probe as eval-full-ld-audit, but for the 64-bit port: the
+            # x64 flavor must also produce a wrapped Steam package.
+            if fullMoonX64.config.programs.steam.package.drvPath != pkgs.steam.drvPath then "moon-x64" else ""
+          );
+          eval-x64-activation = expect "x64-activation" (
+            if
+              (fullMoonX64.config.system.activationScripts ? "moon-crab-luatools")
+              && (fullMoonX64.config.system.activationScripts ? "moon-crab-slssteam-config")
             then
               "present"
             else
