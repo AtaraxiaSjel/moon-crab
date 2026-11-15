@@ -28,10 +28,17 @@ let
       pkgs.runCommand "config.yaml"
         {
           nativeBuildInputs = [ pkgs.yq-go ];
+          # strings are JSON-escaped here, YAML-safe after yq decoding below.
+          overlayJson = builtins.toJSON cfg.slssteam.settings;
+          passAsFile = [ "overlayJson" ];
         }
         ''
+          # formats.yaml.generate is not relied on (API differs across
+          # channels): overlay starts as JSON, yq decodes it to YAML, then
+          # integer-looking keys are unquoted for SLSsteam's line-wise reader.
+          yq -o=yaml '.' "$overlayJsonPath" > overlay.json.yaml
           sed -E "s/^([[:space:]]*)['\"]([0-9]+)['\"]:/\1\2:/" \
-            ${pkgs.formats.yaml { }.generate "slssteam-overlay.yaml" cfg.slssteam.settings} > overlay.yaml
+            overlay.json.yaml > overlay.yaml
           yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
             ${forkDefault} overlay.yaml > $out
         '';
