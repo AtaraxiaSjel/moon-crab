@@ -1,8 +1,7 @@
 # Writes a body into a system activation snippet that runs on every
 # nixos-rebuild switch as the resolved user — the home-manager-free way to
-# manage ~/. files. Same contract as steamlauncher's activate.nix: the snippet
-# runs with HOME set and two helpers in scope (run/own), records failures via
-# _status without aborting the switch.
+# manage ~/. files. The snippet runs with HOME set and two helpers
+# in scope (run/own), records failures via _status without aborting the switch.
 {
   lib,
   pkgs,

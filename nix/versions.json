@@ -3,9 +3,9 @@
     "owner": "AceSLS",
     "repo": "SLSsteam",
     "tag": "20261112130346",
+    "rev": "4dec48344c51c8180a23d914e5522a9ab0ed70f5",
     "version": "20261112130346",
-    "asset": "SLSsteam-Any-release.7z",
-    "hash": "sha256-jfbAF5PwnlqFdRa58MHgvqz7mW+xKNjqxt5sWFlK/TY="
+    "hash": "sha256-lNs5Vm8eR3+10Jt4V/8J2y/InWnlqXCfnWAn0uNjOKY="
   },
   "slsteam-moon": {
     "owner": "swwayps",

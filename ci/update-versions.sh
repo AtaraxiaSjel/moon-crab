@@ -27,6 +27,11 @@ asset_hash() {
   nix store prefetch-file --json "$1" | jq -r .hash
 }
 
+# SRI hash of a GitHub repo at a rev (what fetchFromGitHub wants).
+rev_hash() {
+  nix store prefetch-file --unpack --json "https://github.com/$1/archive/$2.tar.gz" | jq -r .hash
+}
+
 # Rewrite one versions.json entry, keeping field order stable.
 set_entry() {
   local key="$1" json="$2" tmp
@@ -54,14 +59,16 @@ pin_release() {
 echo "== upstream =="
 OLD="$(cat "$VERSIONS")"
 
+# slssteam is a source build: pin the tag's commit rev + its NAR hash
+# (fetchFromGitHub), not a release asset.
 SLS_TAG="$(latest_tag AceSLS/SLSsteam)"
-SLS_ASSET="SLSsteam-Any-release.7z"
-SLS_URL="https://github.com/AceSLS/SLSsteam/releases/download/$SLS_TAG/$SLS_ASSET"
-SLS_HASH="$(asset_hash "$SLS_URL")"
+SLS_REV="$(gh api "repos/AceSLS/SLSsteam/commits/$SLS_TAG" --jq .sha 2>/dev/null \
+  || curl -fsSL "https://api.github.com/repos/AceSLS/SLSsteam/commits/$SLS_TAG" | jq -r .sha)"
+SLS_HASH="$(rev_hash AceSLS/SLSsteam "$SLS_REV")"
 set_entry "slssteam" "$(jq -n \
-  --arg tag "$SLS_TAG" --arg version "$SLS_TAG" --arg hash "$SLS_HASH" \
-  '{owner:"AceSLS",repo:"SLSsteam",tag:$tag,version:$version,asset:"SLSsteam-Any-release.7z",hash:$hash}')"
-echo "slssteam: $SLS_TAG $SLS_HASH"
+  --arg tag "$SLS_TAG" --arg rev "$SLS_REV" --arg version "$SLS_TAG" --arg hash "$SLS_HASH" \
+  '{owner:"AceSLS",repo:"SLSsteam",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
+echo "slssteam: $SLS_TAG $SLS_REV $SLS_HASH"
 
 pin_release "lumen" "swwayps/lumen" "lumen-linux.zip"
 pin_release "luatools" "swwayps/luatools-moon" "luatools-linux.zip"

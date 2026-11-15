@@ -1,5 +1,5 @@
 # ASSella (Steam game and depot management suite) from its release AppImage.
-# Modeled on the ataraxiadev enter-the-wired packaging: extract icon/desktop
+# Modeled on enter-the-wired packaging: extract icon/desktop
 # from the AppImage itself, wrap with wrapType2, then strip the Qt plugin env
 # (a leaked QT_PLUGIN_PATH mixes nixpkgs Qt plugins into the bundled PyQt6 and
 # dies on version-mismatched private-ABI symbols in KDE sessions).
