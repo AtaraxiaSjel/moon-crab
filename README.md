@@ -7,16 +7,16 @@ slsteam-moon fork), Lumen + LuaTools, and ASSella.
 
 ```nix
 {
-  inputs.moon-crab.url = "github:<you>/moon-crab";
+  inputs.moon-crab.url = "github:ataraxiasjel/moon-crab";
   # ...
   imports = [ moon-crab.nixosModules.default ];
 
   programs.moon-crab = {
     slssteam.enable = true;
     slssteam.flavor = "moon-x64"; # "upstream" | "moon" (32-bit) | "moon-x64" (steamrt64)
-    luatools.enable = true;     # needs flavor "moon" or "moon-x64"
-    assella = true;             # optional depot downloader
-    slssteam.settings = {       # optional declarative config.yaml
+    luatools.enable = true;      # needs flavor "moon" or "moon-x64"
+    assella = true;              # optional depot downloader
+    slssteam.settings = {        # optional declarative config.yaml
       DisableCloud = true;
     };
   };

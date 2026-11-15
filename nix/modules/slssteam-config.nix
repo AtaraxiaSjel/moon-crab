@@ -55,7 +55,19 @@ let
             -e 's/([{,][[:space:]]*)"([A-Za-z0-9_.-]+)":/\1\2:/g' \
             overlay.flow.yaml > overlay.norm.yaml
           sed -E "s/^([[:space:]]*)['\"]([0-9]+)['\"]:/\1\2:/" \
-            overlay.norm.yaml > overlay.yaml
+            overlay.norm.yaml > overlay.num.yaml
+          # SLSsteam's own config.yaml spells booleans yes/no: rewrite the
+          # overlay's bare true/false scalars (block, sequence, and flow)
+          # before the merge so the result matches. Quoted "true"/"false"
+          # strings, numbers, and base-file comments are untouched.
+          sed -E \
+            -e 's/: true([[:space:]]*)$/: yes\1/' \
+            -e 's/: false([[:space:]]*)$/: no\1/' \
+            -e 's/^([[:space:]]*-[[:space:]]+)true([[:space:]]*)$/\1yes\2/' \
+            -e 's/^([[:space:]]*-[[:space:]]+)false([[:space:]]*)$/\1no\2/' \
+            -e 's/([:{,\[][[:space:]]*)true([[:space:]]*[][,}])/\1yes\2/g' \
+            -e 's/([:{,\[][[:space:]]*)false([[:space:]]*[][,}])/\1no\2/g' \
+            overlay.num.yaml > overlay.yaml
           yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
             ${forkDefault} overlay.yaml > $out
         '';
