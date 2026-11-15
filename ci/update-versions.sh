@@ -31,7 +31,7 @@ asset_hash() {
 set_entry() {
   local key="$1" json="$2" tmp
   tmp="$(mktemp)"
-  jq --argjson e "$json" ".$key = \$e" "$VERSIONS" > "$tmp"
+  jq --argjson e "$json" --arg k "$key" '.[$k] = $e' "$VERSIONS" > "$tmp"
   mv "$tmp" "$VERSIONS"
 }
 
@@ -78,12 +78,22 @@ set_entry "slsteam-moon" "$(jq -n \
 echo "slsteam-moon: $MOON_TAG $MOON_HASH"
 
 if [ "${1:-}" = "--check" ]; then
-  if ! diff <(echo "$OLD") "$(cat "$VERSIONS")" >/dev/null; then
+  old_tmp="$(mktemp)"
+  new_tmp="$(mktemp)"
+  printf '%s\n' "$OLD" > "$old_tmp"
+  cat "$VERSIONS" > "$new_tmp"
+  if ! diff "$old_tmp" "$new_tmp" >/dev/null; then
     echo "versions.json is stale — run ci/update-versions.sh" >&2
+    rm -f "$old_tmp" "$new_tmp"
     exit 1
   fi
+  rm -f "$old_tmp" "$new_tmp"
   echo "versions.json is current"
 else
-  echo "---"
-  diff <(echo "$OLD") "$(cat "$VERSIONS")" || true
+  old_tmp="$(mktemp)"
+  new_tmp="$(mktemp)"
+  printf '%s\n' "$OLD" > "$old_tmp"
+  cat "$VERSIONS" > "$new_tmp"
+  diff "$old_tmp" "$new_tmp" || true
+  rm -f "$old_tmp" "$new_tmp"
 fi
