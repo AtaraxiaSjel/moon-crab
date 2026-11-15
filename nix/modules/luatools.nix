@@ -128,34 +128,23 @@ in
     # (pgrep-guarded; nothing in Lumen is single-instance). Replaced by the
     # systemd unit when service mode is on — two start paths would fight over
     # the same CEF target.
+    #
+    # The shim wins the system-path collision on bin/steam via hiPrio and
+    # execs the real (LD_AUDIT-wrapped) Steam by direct store path — PATH
+    # scanning cannot work here since both live in the same directory.
     (lib.mkIf (cfg.luatools.enable && !cfg.luatools.service && userScoped) {
       environment.systemPackages = [
-        (pkgs.writeShellScriptBin "steam" ''
-          real_steam=""
-          oIFS=$IFS
-          IFS=:
-          for d in $PATH; do
-            [ -n "$d" ] || continue
-            cand="$d/steam"
-            [ -x "$cand" ] || continue
-            [ "$cand" -ef "$0" ] && continue
-            real_steam="$cand"
-            break
-          done
-          IFS=$oIFS
-          if [ -z "$real_steam" ]; then
-            echo "moon-crab: system Steam launcher not found on PATH" >&2
-            exit 1
-          fi
+        (lib.hiPrio (
+          pkgs.writeShellScriptBin "steam" ''
+            LUMEN_DIR="$HOME/.local/share/Lumen"
+            if [ -x "$LUMEN_DIR/lumen" ] \
+              && ! ${pkgs.procps}/bin/pgrep -f "$LUMEN_DIR/lumen" >/dev/null 2>&1; then
+              ${pkgs.util-linux}/bin/setsid "$LUMEN_DIR/lumen" >/dev/null 2>&1 </dev/null &
+            fi
 
-          LUMEN_DIR="$HOME/.local/share/Lumen"
-          if [ -x "$LUMEN_DIR/lumen" ] \
-            && ! ${pkgs.procps}/bin/pgrep -f "$LUMEN_DIR/lumen" >/dev/null 2>&1; then
-            ${pkgs.util-linux}/bin/setsid "$LUMEN_DIR/lumen" >/dev/null 2>&1 </dev/null &
-          fi
-
-          exec "$real_steam" "$@"
-        '')
+            exec "${config.programs.steam.package}/bin/steam" "$@"
+          ''
+        ))
       ];
     })
 
