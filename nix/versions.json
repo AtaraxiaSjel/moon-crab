@@ -11,9 +11,9 @@
     "owner": "swwayps",
     "repo": "slsteam-moon",
     "tag": "v2.9",
+    "rev": "668a6467501a7dab02512c3c7d1cf8ddb54d0bb6",
     "version": "2.9",
-    "asset": "slsteam-moon-linux-{ver}-lumen.zip",
-    "hash": "sha256-wF0jKMmQJnMpXNdsLimdyFOrdg/UcNZ9FTd+XBCZXHI="
+    "hash": "sha256-C0WL3lZ2WRh/iGErL5PZ07yvuYXMRuz42xYmktmCYNc="
   },
   "lumen": {
     "owner": "swwayps",

@@ -42,11 +42,10 @@ set `programs.moon-crab.user` explicitly.
 
 ## Notes
 
-- Upstream SLSsteam builds from source (rev + NAR hash); slsteam-moon stays
-  a release-binary consumption (no 32-bit toolchain in the closure). A
-  readelf guard in the moon builder fails the build if a future release
-  links a library the Steam runtime does not ship — that is the signal to
-  switch that entry to a source build too.
+- Both SLSsteam builds compile from source (rev + NAR hash): upstream as a
+  64-bit object, slsteam-moon as the two 32-bit objects with vendored static
+  libs. NEEDED stays minimal (pthread/dl + standard libs); curl resolves via
+  dlopen at runtime.
 - `programs.moon-crab.steam` is a small typed subset (enable/package/extraPkgs/
   extraEnv/extraBwrapArgs + freeform passthrough), shaped so a future
   steam-config-nix import can extend it without reshaping consumers.

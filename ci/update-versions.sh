@@ -74,15 +74,17 @@ pin_release "lumen" "swwayps/lumen" "lumen-linux.zip"
 pin_release "luatools" "swwayps/luatools-moon" "luatools-linux.zip"
 pin_release "assella" "niwia/ASSella" "ASSella.AppImage"
 
+# slsteam-moon is a source build too: pin the tag's commit rev + its NAR
+# hash (fetchFromGitHub), not the release zip.
 MOON_TAG="$(latest_tag swwayps/slsteam-moon)"
 MOON_VER="${MOON_TAG#v}"
-MOON_ASSET="slsteam-moon-linux-$MOON_VER-lumen.zip"
-MOON_URL="https://github.com/swwayps/slsteam-moon/releases/download/$MOON_TAG/$MOON_ASSET"
-MOON_HASH="$(asset_hash "$MOON_URL")"
+MOON_REV="$(gh api "repos/swwayps/slsteam-moon/commits/$MOON_TAG" --jq .sha 2>/dev/null \
+  || curl -fsSL "https://api.github.com/repos/swwayps/slsteam-moon/commits/$MOON_TAG" | jq -r .sha)"
+MOON_HASH="$(rev_hash swwayps/slsteam-moon "$MOON_REV")"
 set_entry "slsteam-moon" "$(jq -n \
-  --arg tag "$MOON_TAG" --arg version "$MOON_VER" --arg hash "$MOON_HASH" \
-  '{owner:"swwayps",repo:"slsteam-moon",tag:$tag,version:$version,asset:"slsteam-moon-linux-{ver}-lumen.zip",hash:$hash}')"
-echo "slsteam-moon: $MOON_TAG $MOON_HASH"
+  --arg tag "$MOON_TAG" --arg rev "$MOON_REV" --arg version "$MOON_VER" --arg hash "$MOON_HASH" \
+  '{owner:"swwayps",repo:"slsteam-moon",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
+echo "slsteam-moon: $MOON_TAG $MOON_REV $MOON_HASH"
 
 if [ "${1:-}" = "--check" ]; then
   old_tmp="$(mktemp)"
