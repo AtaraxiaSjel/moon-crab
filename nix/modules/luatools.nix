@@ -81,6 +81,11 @@ in
               run mkdir -p "$dir"
               run cp -r "$src"/. "$dir"/
               run chmod -R u+w "$dir"
+              # Activation runs as root, so the copied tree (and any
+              # preserved runtime state) ends up root-owned and the plugin
+              # cannot write (e.g. backend/data/lua_tools_auth.json on
+              # login). Hand the whole tree to the user.
+              own "$dir"
             }
 
             writeStamp() {
@@ -109,6 +114,11 @@ in
             else
               echo "moon-crab: LuaTools plugin is up to date"
             fi
+
+            # Installs predating the own() in installDist left root-owned
+            # trees behind with up-to-date stamps, so no reinstall would
+            # ever repair them. Reassert ownership on every activation.
+            own "${dir}" "${stampDir}"
           '';
     })
 
