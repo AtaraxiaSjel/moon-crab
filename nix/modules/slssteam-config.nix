@@ -34,11 +34,18 @@ let
         }
         ''
           # formats.yaml.generate is not relied on (API differs across
-          # channels): overlay starts as JSON, yq decodes it to YAML, then
-          # integer-looking keys are unquoted for SLSsteam's line-wise reader.
-          yq -o=yaml '.' "$overlayJsonPath" > overlay.json.yaml
+          # channels): overlay starts as JSON and is normalized to plain
+          # block-style YAML. yq -P alone only reformats the outer flow doc,
+          # inner values stay flow and quoted keys leak through — and "Key" !=
+          # Key in YAML, so quoted keys would miss the base doc entirely.
+          # Strip the quotes with sed. NOTE: no explode() on the merge — it
+          # re-emits both sides as separate flow docs instead of merging.
+          yq -P '.' "$overlayJsonPath" > overlay.flow.yaml
+          sed -E -e 's/^([[:space:]]*)"([A-Za-z0-9_.-]+)":/\1\2:/' \
+            -e 's/([{,][[:space:]]*)"([A-Za-z0-9_.-]+)":/\1\2:/g' \
+            overlay.flow.yaml > overlay.norm.yaml
           sed -E "s/^([[:space:]]*)['\"]([0-9]+)['\"]:/\1\2:/" \
-            overlay.json.yaml > overlay.yaml
+            overlay.norm.yaml > overlay.yaml
           yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
             ${forkDefault} overlay.yaml > $out
         '';
