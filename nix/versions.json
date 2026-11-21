@@ -10,34 +10,26 @@
   "slsteam-moon": {
     "owner": "swwayps",
     "repo": "slsteam-moon",
-    "tag": "v2.9",
-    "rev": "668a6467501a7dab02512c3c7d1cf8ddb54d0bb6",
-    "version": "2.9",
-    "hash": "sha256-C0WL3lZ2WRh/iGErL5PZ07yvuYXMRuz42xYmktmCYNc="
-  },
-  "slsteam-moon-x64": {
-    "owner": "ogb4n",
-    "repo": "slsteam-moon-x64",
-    "tag": "v20261113203701",
-    "rev": "b0c0f8eb970a08f450641b8239ddca9cdac60e91",
-    "version": "20261113203701",
-    "hash": "sha256-CZP8p4CncfN7Z5S0JZLbwky/6Iq00XR3r/ZwFOr0C+o="
+    "tag": "v3.0",
+    "rev": "7725a93ec008c5d461b69cc0d36c8d8b857472c9",
+    "version": "3.0",
+    "hash": "sha256-2pAL+SWuIWjZlMi4sDn7nFGLdNKqjEHhuAwMNMLIZOI="
   },
   "lumen": {
     "owner": "swwayps",
     "repo": "lumen",
     "tag": "v2.9",
-    "version": "2.9",
-    "asset": "lumen-linux.zip",
-    "hash": "sha256-eqDLf7am3cc7jVSN4/Tw1Y020Vi+DKj+MjcN0Q5B2qc="
+    "rev": "7f475334a5a69a20369754eb35788eb6ab16f5ea",
+    "version": "2.9-unstable-2026-11-20",
+    "hash": "sha256-nzvKXQgxPiEF0gDAI+OQUaemVV/tFoTX61y3PYgaC0M="
   },
   "luatools": {
     "owner": "swwayps",
     "repo": "luatools-moon",
     "tag": "v2.9",
-    "version": "2.9",
-    "asset": "luatools-linux.zip",
-    "hash": "sha256-9N22fGa+ZhCINIhWNHZ89p589UKqfBIeoX9h0f78Ta4="
+    "rev": "58e190ebacf05b7a034d1e6291d465e41618a708",
+    "version": "2.9-unstable-2026-11-20",
+    "hash": "sha256-mZQSubXpeEEWDq8nAHVim2mzktxYawGU3dwsCl40DpI="
   },
   "assella": {
     "owner": "niwia",

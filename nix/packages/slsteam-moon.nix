@@ -1,21 +1,26 @@
-# slsteam-moon built from source: the two 32-bit injected objects plus the
+# slsteam-moon built from source: the single 64-bit audit object plus the
 # res/config.yaml from the same tree (the managed config's merge base).
 #
+# Since v3.0 the main project targets the steamrt64 client natively: the
+# Makefile is 64-bit (no -m32) and library-inject.so is gone — a 32-bit
+# libcurl redirect has no business in the 64-bit client, and the fork that
+# carried the x86_64 port (ogb4n/slsteam-moon-x64) is therefore retired.
 # The link needs only -lpthread -ldl: libcurl is resolved via dlopen at
-# runtime and SHA256 is a vendored implementation (openssl headers are
-# compile-only, for sha.h constants). Only the two Steam-loaded i386
-# objects are built — pattern-refresh is a native host helper, never run.
+# runtime (curl/curl.h is compile-only) and luajit is a vendored static
+# archive (luajit headers are compile-only, for the Lua hook signatures).
 {
   lib,
+  stdenv,
   fetchFromGitHub,
-  pkgsi686Linux,
   pkg-config,
   patchelf,
+  curl,
+  luajit,
 }:
 let
   v = lib.importJSON ../versions.json;
   u = v.slsteam-moon;
-  drv = pkgsi686Linux.stdenv.mkDerivation {
+  drv = stdenv.mkDerivation {
     pname = "slsteam-moon";
     version = u.version;
 
@@ -31,20 +36,20 @@ let
       patchelf
     ];
 
-    buildInputs = with pkgsi686Linux; [
+    buildInputs = [
       curl
-      openssl
+      luajit
     ];
 
-    env.NIX_CFLAGS_COMPILE = "-include cstdint";
-
     postPatch = ''
-      patchShebangs embed-version.sh embed-config.sh
+      patchShebangs embed-config.sh
     '';
 
+    # audit object only: pattern-refresh is a native host helper this flake
+    # never runs.
     buildPhase = ''
       runHook preBuild
-      make bin/SLSsteam.so bin/library-inject.so
+      make bin/SLSsteam.so
       runHook postBuild
     '';
 
@@ -52,29 +57,25 @@ let
 
     installPhase = ''
       runHook preInstall
-      install -D bin/SLSsteam.so bin/library-inject.so -t $out/lib/
+      install -D bin/SLSsteam.so -t $out/lib/
       install -D res/config.yaml -t $out/res/
       runHook postInstall
     '';
 
     postFixup = ''
       patchelf --remove-rpath $out/lib/SLSsteam.so
-      patchelf --remove-rpath $out/lib/library-inject.so
     '';
 
     meta = {
       description = "SLSsteam fork with a native Lua manifest importer (slsteam-moon)";
       homepage = "https://github.com/${u.owner}/${u.repo}";
       license = lib.licenses.agpl3Only;
-      # Host here is i686 (pkgsi686Linux toolchain); the output only ever
-      # lands on x86_64 systems next to a 64-bit Steam, but the derivation
-      # itself must accept the i686 host.
-      platforms = lib.platforms.linux;
+      platforms = [ "x86_64-linux" ];
     };
   };
 in
 drv
 // {
   defaultConfig = "${drv}/res/config.yaml";
-  ldAudit = "${drv}/lib/library-inject.so:${drv}/lib/SLSsteam.so";
+  ldAudit = "${drv}/lib/SLSsteam.so";
 }

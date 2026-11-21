@@ -3,8 +3,8 @@
 # Both dists are assembled in the store (packages/lumen-dist.nix,
 # packages/luatools.nix); the activation copies them into real directories
 # because Lumen and the plugin write state at runtime (config, manifest
-# packs, logs). A steam-run shim stands in for the raw binary: Lumen's ELF
-# needs the FHS sandbox on NixOS.
+# packs, logs). The raw binary runs NATIVELY via a shim, never inside
+# steam-run (see below).
 {
   lumenDist,
   luatools,
@@ -28,10 +28,10 @@ let
   # steam-run): Lumen's peerauth must resolve the CEF listener's owner through
   # /proc/PID/{exe,fd}, and inside steam-run those readlinks fail, so it
   # refuses to attach ("owner unknown") and no menu button appears. The
-  # 32-bit loader env is still dropped — it carries the slsteam-moon hooks,
-  # which would give 64-bit lumen.bin "wrong ELF class". A store file, not
-  # a heredoc: copied verbatim into the install dir, so no Nix-string
-  # reindentation can ever break it.
+  # audit env is still dropped — lumen.bin is a non-Steam process and must
+  # never load the SLSsteam audit object. A store file, not a heredoc:
+  # copied verbatim into the install dir, so no Nix-string reindentation
+  # can ever break it.
   shim = pkgs.writeText "lumen" ''
     #!/bin/sh
     cd "$(dirname "$0")" || exit 1

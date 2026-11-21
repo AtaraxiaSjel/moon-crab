@@ -6,8 +6,8 @@
 # owner via /proc/PID/{exe,fd} — and inside steam-run (a bwrap sandbox) those
 # readlinks fail, so it logs "refusing to attach ... (owner unknown)" and no
 # menu button ever appears. Native launch keeps full /proc visibility; the
-# 32-bit loader env is still dropped (it carries the slsteam-moon hooks,
-# which would give 64-bit lumen.bin "wrong ELF class" from ld.so).
+# audit env is still dropped (lumen.bin is a non-Steam process and must never
+# load the SLSsteam audit object).
 { writeShellScriptBin }:
 writeShellScriptBin "lumen" ''
   dir="$HOME/.local/share/Lumen"

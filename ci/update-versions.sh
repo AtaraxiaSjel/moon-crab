@@ -40,6 +40,35 @@ set_entry() {
   mv "$tmp" "$VERSIONS"
 }
 
+# Commit rev of a repo at a ref (what fetchFromGitHub wants).
+ref_rev() {
+  gh api "repos/$1/commits/$2" --jq .sha 2>/dev/null \
+    || curl -fsSL "https://api.github.com/repos/$1/commits/$2" | jq -r .sha
+}
+
+# Source build pinned by tag + rev + NAR hash (fetchFromGitHub). The pin may
+# sit ahead of the latest release (HEAD fixes upstream has not released yet —
+# e.g. lumen's steamrt64 peerauth fix), so this only moves forward when a
+# newer release tag appears and never back down to the tag's rev.
+pin_source() {
+  local key="$1" repo="$2" tag cur_tag rev hash entry
+  tag="$(latest_tag "$repo")"
+  cur_tag="$(jq -r --arg k "$key" '.[$k].tag' "$VERSIONS")"
+  if [ "$tag" = "$cur_tag" ]; then
+    echo "$key: already at $tag (rev may be ahead of the release)"
+    return 0
+  fi
+  rev="$(ref_rev "$repo" "$tag")"
+  hash="$(rev_hash "$repo" "$rev")"
+  entry="$(jq -n \
+    --arg owner "${repo%%/*}" --arg repo "${repo##*/}" \
+    --arg tag "$tag" --arg rev "$rev" --arg version "${tag#v}" \
+    --arg hash "$hash" \
+    '{owner:$owner,repo:$repo,tag:$tag,rev:$rev,version:$version,hash:$hash}')"
+  set_entry "$key" "$entry"
+  echo "$key: $tag $rev $hash"
+}
+
 pin_release() {
   local key="$1" repo="$2" asset="$3"
   local tag url hash version entry
@@ -62,42 +91,29 @@ OLD="$(cat "$VERSIONS")"
 # slssteam is a source build: pin the tag's commit rev + its NAR hash
 # (fetchFromGitHub), not a release asset.
 SLS_TAG="$(latest_tag AceSLS/SLSsteam)"
-SLS_REV="$(gh api "repos/AceSLS/SLSsteam/commits/$SLS_TAG" --jq .sha 2>/dev/null \
-  || curl -fsSL "https://api.github.com/repos/AceSLS/SLSsteam/commits/$SLS_TAG" | jq -r .sha)"
+SLS_REV="$(ref_rev AceSLS/SLSsteam "$SLS_TAG")"
 SLS_HASH="$(rev_hash AceSLS/SLSsteam "$SLS_REV")"
 set_entry "slssteam" "$(jq -n \
   --arg tag "$SLS_TAG" --arg rev "$SLS_REV" --arg version "$SLS_TAG" --arg hash "$SLS_HASH" \
   '{owner:"AceSLS",repo:"SLSsteam",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
 echo "slssteam: $SLS_TAG $SLS_REV $SLS_HASH"
 
-pin_release "lumen" "swwayps/lumen" "lumen-linux.zip"
-pin_release "luatools" "swwayps/luatools-moon" "luatools-linux.zip"
+# lumen and luatools are source builds whose pins may sit ahead of the latest
+# release (see pin_source): the steamrt64 fixes landed on main after v2.9.
+pin_source "lumen" "swwayps/lumen"
+pin_source "luatools" "swwayps/luatools-moon"
 pin_release "assella" "niwia/ASSella" "ASSella.AppImage"
 
 # slsteam-moon is a source build too: pin the tag's commit rev + its NAR
 # hash (fetchFromGitHub), not the release zip.
 MOON_TAG="$(latest_tag swwayps/slsteam-moon)"
 MOON_VER="${MOON_TAG#v}"
-MOON_REV="$(gh api "repos/swwayps/slsteam-moon/commits/$MOON_TAG" --jq .sha 2>/dev/null \
-  || curl -fsSL "https://api.github.com/repos/swwayps/slsteam-moon/commits/$MOON_TAG" | jq -r .sha)"
+MOON_REV="$(ref_rev swwayps/slsteam-moon "$MOON_TAG")"
 MOON_HASH="$(rev_hash swwayps/slsteam-moon "$MOON_REV")"
 set_entry "slsteam-moon" "$(jq -n \
   --arg tag "$MOON_TAG" --arg rev "$MOON_REV" --arg version "$MOON_VER" --arg hash "$MOON_HASH" \
   '{owner:"swwayps",repo:"slsteam-moon",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
 echo "slsteam-moon: $MOON_TAG $MOON_REV $MOON_HASH"
-
-# slsteam-moon-x64 is a source build too: pin the latest release tag's commit
-# rev + its NAR hash. Kept separate from slsteam-moon so the 32-bit pin stays
-# put as the instant rollback while upstream catches up.
-MOONX64_TAG="$(latest_tag ogb4n/slsteam-moon-x64)"
-MOONX64_VER="${MOONX64_TAG#v}"
-MOONX64_REV="$(gh api "repos/ogb4n/slsteam-moon-x64/commits/$MOONX64_TAG" --jq .sha 2>/dev/null \
-  || curl -fsSL "https://api.github.com/repos/ogb4n/slsteam-moon-x64/commits/$MOONX64_TAG" | jq -r .sha)"
-MOONX64_HASH="$(rev_hash ogb4n/slsteam-moon-x64 "$MOONX64_REV")"
-set_entry "slsteam-moon-x64" "$(jq -n \
-  --arg tag "$MOONX64_TAG" --arg rev "$MOONX64_REV" --arg version "$MOONX64_VER" --arg hash "$MOONX64_HASH" \
-  '{owner:"ogb4n",repo:"slsteam-moon-x64",tag:$tag,rev:$rev,version:$version,hash:$hash}')"
-echo "slsteam-moon-x64: $MOONX64_TAG $MOONX64_REV $MOONX64_HASH"
 
 if [ "${1:-}" = "--check" ]; then
   old_tmp="$(mktemp)"

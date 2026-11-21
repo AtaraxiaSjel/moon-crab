@@ -10,7 +10,6 @@
 {
   slssteam,
   slsteamMoon,
-  slsteamMoonX64,
 }:
 {
   config,
@@ -22,13 +21,7 @@ let
   cfg = config.programs.moon-crab;
   target = import ../lib/target.nix { inherit config lib; };
 
-  active =
-    if cfg.slssteam.flavor == "moon" then
-      slsteamMoon pkgs
-    else if cfg.slssteam.flavor == "moon-x64" then
-      slsteamMoonX64 pkgs
-    else
-      slssteam pkgs;
+  active = if cfg.slssteam.flavor == "moon" then slsteamMoon pkgs else slssteam pkgs;
   forkDefault = active.defaultConfig;
 
   managed =

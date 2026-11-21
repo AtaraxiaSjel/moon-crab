@@ -13,8 +13,8 @@ slsteam-moon fork), Lumen + LuaTools, and ASSella.
 
   programs.moon-crab = {
     slssteam.enable = true;
-    slssteam.flavor = "moon-x64"; # "upstream" | "moon" (32-bit) | "moon-x64" (steamrt64)
-    luatools.enable = true;      # needs flavor "moon" or "moon-x64"
+    slssteam.flavor = "moon"; # "upstream" | "moon" (steamrt64 client)
+    luatools.enable = true;      # needs flavor "moon"
     assella = true;              # optional depot downloader
     slssteam.settings = {        # optional declarative config.yaml
       DisableCloud = true;
@@ -42,11 +42,16 @@ set `programs.moon-crab.user` explicitly.
 
 ## Notes
 
-- Both SLSsteam builds compile from source (rev + NAR hash): upstream as a
-  64-bit object, slsteam-moon as the two 32-bit objects with vendored static
-  libs, slsteam-moon-x64 (ogb4n's 64-bit port for the steamrt64 client) as
-  one 64-bit object without library-inject.so. NEEDED stays minimal
-  (pthread/dl + standard libs); curl resolves via dlopen at runtime.
+- All three moon-stack builds compile from source (rev + NAR hash): upstream
+  as a 64-bit object, slsteam-moon since v3.0 as the 64-bit object for the
+  steamrt64 client (the Makefile dropped `-m32` and `library-inject.so`; the
+  ogb4n/slsteam-moon-x64 interim port is retired), and Lumen from main so the
+  steamrt64 peerauth fix ships ahead of its next release. NEEDED stays
+  minimal (pthread/dl + standard libs); curl resolves via dlopen at runtime.
+- lumen and luatools are pinned to main, not to their release zips: the
+  steamrt64 fixes landed after v2.9 and have no release yet.
+  `ci/update-versions.sh` only moves those pins forward when a new release
+  tag appears — it never rolls a HEAD pin back to the tag's rev.
 - `programs.moon-crab.steam` is a small typed subset (enable/package/extraPkgs/
   extraEnv/extraBwrapArgs + freeform passthrough), shaped so a future
   steam-config-nix import can extend it without reshaping consumers.

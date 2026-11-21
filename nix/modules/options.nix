@@ -81,17 +81,13 @@ in
         type = lib.types.enum [
           "upstream"
           "moon"
-          "moon-x64"
         ];
         default = "upstream";
-        example = "moon-x64";
+        example = "moon";
         description = ''
-          Which SLSsteam build to inject: upstream AceSLS/SLSsteam, the
+          Which SLSsteam build to inject: upstream AceSLS/SLSsteam, or the
           slsteam-moon fork with a native Lua manifest importer (required by
-          luatools), or its 64-bit-only port for the steamrt64 client
-          (ogb4n/slsteam-moon-x64). One flag, not two — the three swap one
-          store path. Roll back from "moon-x64" to "moon" with one word when
-          upstream catches up.
+          luatools).
         '';
       };
       settings = lib.mkOption {
@@ -113,9 +109,9 @@ in
 
     luatools = {
       enable = lib.mkEnableOption ''
-        the LuaTools stack for the moon flavors: Lumen (backend) plus the
+        the LuaTools stack for the moon flavor: Lumen (backend) plus the
         LuaTools plugin under ~/.local/share/Lumen, with a `lumen` launcher
-        command. Requires slssteam flavor "moon" or "moon-x64".
+        command. Requires slssteam flavor "moon".
       '';
       service = lib.mkEnableOption ''
         running Lumen as a systemd user service (starts at login,
@@ -128,13 +124,12 @@ in
 
   config.assertions = [
     {
-      assertion =
-        !cfg.luatools.enable || cfg.slssteam.flavor == "moon" || cfg.slssteam.flavor == "moon-x64";
+      assertion = !cfg.luatools.enable || cfg.slssteam.flavor == "moon";
       message = ''
         programs.moon-crab.luatools.enable requires
-        programs.moon-crab.slssteam.flavor = "moon" or "moon-x64": the
-        Lumen backend drives slsteam-moon's Lua manifest importer, which
-        upstream SLSsteam lacks.
+        programs.moon-crab.slssteam.flavor = "moon": the Lumen backend
+        drives slsteam-moon's Lua manifest importer, which upstream
+        SLSsteam lacks.
       '';
     }
     {
