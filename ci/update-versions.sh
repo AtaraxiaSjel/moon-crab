@@ -103,6 +103,19 @@ echo "slssteam: $SLS_TAG $SLS_REV $SLS_HASH"
 pin_source "lumen" "swwayps/lumen"
 pin_source "luatools" "swwayps/luatools-moon"
 pin_release "assella" "niwia/ASSella" "ASSella.AppImage"
+pin_source "artitux" "Lumice/artitux"
+
+# artitux builds via rustPlatform.importCargoLock against the Cargo.lock copy
+# in nix/packages/, so refresh that copy from the pinned source — checked
+# against the hash pin_source just wrote, so the copy can never drift from
+# the source the build actually uses.
+ARTITUX_FETCH="$(nix store prefetch-file --unpack --json "https://github.com/Lumice/artitux/archive/$(jq -r '.artitux.rev' "$VERSIONS").tar.gz")"
+if [ "$(jq -r .hash <<<"$ARTITUX_FETCH")" != "$(jq -r '.artitux.hash' "$VERSIONS")" ]; then
+  echo "artitux: prefetched source does not match the pinned hash" >&2
+  exit 1
+fi
+cp "$(jq -r .storePath <<<"$ARTITUX_FETCH")/Cargo.lock" "$ROOT/nix/packages/artitux-cargo.lock"
+echo "artitux: Cargo.lock refreshed"
 
 # slsteam-moon is a source build too: pin the tag's commit rev + its NAR
 # hash (fetchFromGitHub), not the release zip.

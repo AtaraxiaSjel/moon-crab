@@ -38,5 +38,13 @@
     "version": "3.1.1",
     "asset": "ASSella.AppImage",
     "hash": "sha256-3gkK1vIdQAsuX/t/WaGUOHeB7+EYYj/EmJNxVkft9ns="
+  },
+  "artitux": {
+    "owner": "Lumice",
+    "repo": "artitux",
+    "tag": "v1.1.2",
+    "rev": "dc175c3e3a68e41a2bacc9d30590812dcd2a5610",
+    "version": "1.1.2",
+    "hash": "sha256-33zuVWrG63riQmBZ64x3MdDski4OPJ9JCxlDWSYCnyo="
   }
 }

@@ -1,7 +1,7 @@
 # moon-crab
 
 Minimal NixOS flake for the moon stack: SLSsteam injection (upstream or the
-slsteam-moon fork), Lumen + LuaTools, and ASSella.
+slsteam-moon fork), Lumen + LuaTools, ASSella, and Artitux.
 
 ## Use
 
@@ -16,6 +16,9 @@ slsteam-moon fork), Lumen + LuaTools, and ASSella.
     slssteam.flavor = "moon"; # "upstream" | "moon" (steamrt64 client)
     luatools.enable = true;      # needs flavor "moon"
     assella = true;              # optional depot downloader
+    artitux.enable = true;       # optional Artifact runtime: launcher + Artitux.so
+    artitux.kmod.enable = true;  # optional companion kernel module
+    artitux.kmod.autoload = true; # default; false keeps it available but loads manually
     slssteam.settings = {        # optional declarative config.yaml
       DisableCloud = true;
     };
@@ -34,7 +37,8 @@ set `programs.moon-crab.user` explicitly.
 - `nix/packages/` — one builder per artefact; both SLSsteam flavors expose the
   same `ldAudit`/`defaultConfig` attributes, so consumers never branch.
 - `nix/modules/` — `options.nix` (all options + assertions), `slssteam.nix`
-  (injection), `slssteam-config.nix` (config.yaml), `luatools.nix`, `assella.nix`.
+  (injection), `slssteam-config.nix` (config.yaml), `luatools.nix`, `assella.nix`,
+  `artitux.nix`.
 - `ci/update-versions.sh` — refreshes versions.json from latest GitHub
   releases (tag + hash together, never by hand).
 - `.github/workflows/` — `check.yml` (flake check + fmt), `sync.yml` (weekly
@@ -55,3 +59,13 @@ set `programs.moon-crab.user` explicitly.
 - `programs.moon-crab.steam` is a small typed subset (enable/package/extraPkgs/
   extraEnv/extraBwrapArgs + freeform passthrough), shaped so a future
   steam-config-nix import can extend it without reshaping consumers.
+- The Artitux package builds Artitux.so through upstream's own `cargo xtask`
+  and generates the launcher by running upstream's install.sh in the builder
+  against a local curl shim (no network; the lib path is rewritten to the
+  store). Its vendored deps come from the checked-in
+  `nix/packages/artitux-cargo.lock` (refreshed by `ci/update-versions.sh`
+  from the hash-verified source), so there is no extra hash to bump.
+  `artitux-kmod` must be instantiated through a kernelPackages set
+  (`kernelPackages.callPackage` injects the kernel); the module option builds
+  against the system kernel, the standalone package pins
+  `linuxPackages_latest`.

@@ -26,6 +26,9 @@
         luatools = pkgs: pkgs.callPackage ./nix/packages/luatools.nix { };
         lumen = pkgs: pkgs.callPackage ./nix/packages/lumen.nix { };
         assella = pkgs: pkgs.callPackage ./nix/packages/assella.nix { };
+        artitux = pkgs: pkgs.callPackage ./nix/packages/artitux.nix { };
+        # A kernel module only makes sense against a kernelPackages set.
+        artituxKmod = kernelPackages: kernelPackages.callPackage ./nix/packages/artitux-kmod.nix { };
       };
 
       nixosModule = {
@@ -41,6 +44,9 @@
             inherit (builders) lumenDist luatools lumen;
           })
           (import ./nix/modules/assella.nix { inherit (builders) assella; })
+          (import ./nix/modules/artitux.nix {
+            inherit (builders) artitux artituxKmod;
+          })
         ];
       };
     in
@@ -57,6 +63,8 @@
           luatools = builders.luatools pkgs;
           lumen-dist = builders.lumenDist pkgs;
           assella = builders.assella pkgs;
+          artitux = builders.artitux pkgs;
+          artitux-kmod = builders.artituxKmod pkgs.linuxPackages_latest;
           default = builders.slsteamMoon pkgs;
         }
       );
@@ -109,6 +117,15 @@
             programs.moon-crab.luatools.enable = true;
             programs.moon-crab.assella = true;
           };
+          fullArtitux = evalSystem {
+            programs.moon-crab.artitux.enable = true;
+            programs.moon-crab.artitux.kmod.enable = true;
+          };
+          artituxManualLoad = evalSystem {
+            programs.moon-crab.artitux.enable = true;
+            programs.moon-crab.artitux.kmod.enable = true;
+            programs.moon-crab.artitux.kmod.autoload = false;
+          };
           # luatools on the upstream flavor must fail evaluation.
           badCombo = builtins.tryEval (
             (evalSystem { programs.moon-crab.luatools.enable = true; }).config.system.build.toplevel.drvPath
@@ -138,6 +155,26 @@
               ""
           );
           eval-bad-combo-fails = expect "bad-combo-fails" (if !badCombo.success then "rejected" else "");
+          eval-full-artitux = expect "full-artitux" (
+            if
+              lib.any (p: p.pname or "" == "artitux") fullArtitux.config.environment.systemPackages
+              && lib.any (p: p.pname or "" == "artitux") fullArtitux.config.programs.moon-crab.steam.extraPkgs
+              && fullArtitux.config.boot.extraModulePackages != [ ]
+              && lib.elem "artitux_kmod" fullArtitux.config.boot.kernelModules
+            then
+              "present"
+            else
+              ""
+          );
+          eval-artitux-manual-load = expect "artitux-manual-load" (
+            if
+              artituxManualLoad.config.boot.extraModulePackages != [ ]
+              && !lib.elem "artitux_kmod" artituxManualLoad.config.boot.kernelModules
+            then
+              "manual"
+            else
+              ""
+          );
         }
       );
 

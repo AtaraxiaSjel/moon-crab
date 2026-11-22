@@ -120,6 +120,27 @@ in
     };
 
     assella = lib.mkEnableOption "ASSella (Steam depot downloader)";
+
+    artitux = {
+      enable = lib.mkEnableOption ''
+        Artitux (LD_PRELOAD runtime for Artifact releases): installs the
+        launcher plus Artitux.so system-wide and into the Steam environment.
+      '';
+      kmod = {
+        enable = lib.mkEnableOption ''
+          The artitux_kmod kernel module: per-process UMIP (SGDT/SIDT) fixup
+          and lazy userspace XCR0=0x7 for VBS 2.0 releases, exposed as
+          /dev/artitux.
+        '';
+        autoload = lib.mkOption {
+          type = lib.types.bool;
+          default = true;
+          description = ''
+            Add artitux_kmod to boot.kernelModules so it loads at boot.
+          '';
+        };
+      };
+    };
   };
 
   config.assertions = [

@@ -25,7 +25,7 @@ jobs:
         run: |
           nix flake update
           nix flake check --print-build-logs
-          nix build .#slssteam .#slsteam-moon .#lumen .#luatools .#assella
+          nix build .#slssteam .#slsteam-moon .#lumen .#luatools .#assella .#artitux .#artitux-kmod
       - name: Open update PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
