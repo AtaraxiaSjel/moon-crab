@@ -1,9 +1,6 @@
-# Artitux: the launcher + Artitux.so.
-# artitux_kmod is a kernel module built against the system's kernel.
-{
-  artitux,
-  artituxKmod,
-}:
+# Artitux: the launcher + Artitux.so from the injected overlay namespace.
+# artitux_kmod always builds against the SYSTEM kernel: kernelPackages.callPackage
+# injects kernel + kernelModuleMakeFlags (a kernel module must match its kernel).
 {
   config,
   lib,
@@ -12,7 +9,7 @@
 }:
 let
   cfg = config.programs.moon-crab;
-  pkg = artitux pkgs;
+  pkg = pkgs.moon-crab.artitux;
 in
 {
   config = lib.mkMerge [
@@ -23,7 +20,9 @@ in
     })
 
     (lib.mkIf cfg.artitux.kmod.enable {
-      boot.extraModulePackages = [ (artituxKmod config.boot.kernelPackages) ];
+      boot.extraModulePackages = [
+        (config.boot.kernelPackages.callPackage ../packages/artitux-kmod.nix { })
+      ];
 
       boot.kernelModules = lib.mkIf cfg.artitux.kmod.autoload [ "artitux_kmod" ];
     })

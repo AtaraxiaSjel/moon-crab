@@ -30,6 +30,13 @@ No home-manager involved: user-scoped files are written by system activation
 snippets on every `nixos-rebuild switch`. With zero or several normal users,
 set `programs.moon-crab.user` explicitly.
 
+The NixOS module injects its own overlay: every moon-crab package is built
+from this flake's pinned nixpkgs (follow-aware, if you override
+`moon-crab.inputs.nixpkgs`), not from your system's nixpkgs, and shows up as
+`pkgs.moon-crab.*` in the system pkgs. The kernel module is the exception —
+it always builds against the system kernel. If you don't want that overlay,
+don't import the module and use `packages`/`overlays.default` directly.
+
 ## Layout
 
 - `nix/versions.json` — every upstream pin (tag + SRI hash). One edit (or one

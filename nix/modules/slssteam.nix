@@ -7,10 +7,6 @@
 # flavor branches, only one path selection. slssteam-config.nix owns the
 # declarative config.yaml half.
 {
-  slssteam,
-  slsteamMoon,
-}:
-{
   config,
   lib,
   pkgs,
@@ -20,7 +16,8 @@ let
   cfg = config.programs.moon-crab;
   steamCfg = cfg.steam;
 
-  sls = if cfg.slssteam.flavor == "moon" then slsteamMoon pkgs else slssteam pkgs;
+  sls =
+    if cfg.slssteam.flavor == "moon" then pkgs.moon-crab.slsteam-moon else pkgs.moon-crab.slssteam;
 
   injectionOn = cfg.slssteam.enable || cfg.luatools.enable;
 

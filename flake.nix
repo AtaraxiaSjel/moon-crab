@@ -32,21 +32,18 @@
       };
 
       nixosModule = {
+        # Packages are built from this flake's own nixpkgs pin (follow-aware)
+        # via the injected overlay; modules read them from pkgs.moon-crab.*
+        # instead of taking the host system's pkgs.
+        nixpkgs.overlays = [ self.overlays.default ];
+
         imports = [
           ./nix/modules/options.nix
-          (import ./nix/modules/slssteam.nix {
-            inherit (builders) slssteam slsteamMoon;
-          })
-          (import ./nix/modules/slssteam-config.nix {
-            inherit (builders) slssteam slsteamMoon;
-          })
-          (import ./nix/modules/luatools.nix {
-            inherit (builders) lumenDist luatools lumen;
-          })
-          (import ./nix/modules/assella.nix { inherit (builders) assella; })
-          (import ./nix/modules/artitux.nix {
-            inherit (builders) artitux artituxKmod;
-          })
+          ./nix/modules/slssteam.nix
+          ./nix/modules/slssteam-config.nix
+          ./nix/modules/luatools.nix
+          ./nix/modules/assella.nix
+          ./nix/modules/artitux.nix
         ];
       };
     in
@@ -68,6 +65,10 @@
           default = builders.slsteamMoon pkgs;
         }
       );
+
+      # Re-exports self.packages (already built against this flake's pinned
+      # nixpkgs): no second nixpkgs instance, new attribute names only.
+      overlays.default = final: prev: { moon-crab = self.packages.${final.stdenv.hostPlatform.system}; };
 
       nixosModules.default = nixosModule;
 

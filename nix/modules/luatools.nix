@@ -6,11 +6,6 @@
 # packs, logs). The raw binary runs NATIVELY via a shim, never inside
 # steam-run (see below).
 {
-  lumenDist,
-  luatools,
-  lumen,
-}:
-{
   config,
   lib,
   pkgs,
@@ -20,9 +15,9 @@ let
   cfg = config.programs.moon-crab;
   target = import ../lib/target.nix { inherit config lib; };
 
-  dist = lumenDist pkgs;
-  plugin = luatools pkgs;
-  entry = lumen pkgs;
+  dist = pkgs.moon-crab.lumen-dist;
+  plugin = pkgs.moon-crab.luatools;
+  entry = pkgs.moon-crab.lumen;
 
   # `~/.local/share/Lumen/lumen` execs the raw binary NATIVELY (not via
   # steam-run): Lumen's peerauth must resolve the CEF listener's owner through

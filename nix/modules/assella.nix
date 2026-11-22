@@ -4,7 +4,6 @@
 # Seeded, not managed: QSettings rewrites this file, so a store symlink would
 # break; the seed only lands when the file does not exist yet, with the same
 # keys ASSella's own installer forces (making it defer to SLSsteam).
-{ assella }:
 {
   config,
   lib,
@@ -15,7 +14,7 @@ let
   cfg = config.programs.moon-crab;
   target = import ../lib/target.nix { inherit config lib; };
 
-  pkg = assella pkgs;
+  pkg = pkgs.moon-crab.assella;
 
   seed = pkgs.writeText "ACCELA.conf" ''
     [General]

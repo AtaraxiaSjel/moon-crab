@@ -8,10 +8,6 @@
 # file on every activation unless the user declared them (a declared key is
 # the user's, and resetting it is the point).
 {
-  slssteam,
-  slsteamMoon,
-}:
-{
   config,
   lib,
   pkgs,
@@ -21,7 +17,8 @@ let
   cfg = config.programs.moon-crab;
   target = import ../lib/target.nix { inherit config lib; };
 
-  active = if cfg.slssteam.flavor == "moon" then slsteamMoon pkgs else slssteam pkgs;
+  active =
+    if cfg.slssteam.flavor == "moon" then pkgs.moon-crab.slsteam-moon else pkgs.moon-crab.slssteam;
   forkDefault = active.defaultConfig;
 
   managed =
