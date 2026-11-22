@@ -66,9 +66,23 @@
         }
       );
 
-      # Re-exports self.packages (already built against this flake's pinned
-      # nixpkgs): no second nixpkgs instance, new attribute names only.
-      overlays.default = final: prev: { moon-crab = self.packages.${final.stdenv.hostPlatform.system}; };
+      # Re-exports self.packages (built against this flake's pinned nixpkgs):
+      # no second nixpkgs instance, new attribute names only. The two SLSsteam
+      # LD_AUDIT libs are the exception: they are injected into the host Steam
+      # FHS process, so their glibc must match that Steam package — build them
+      # from the consumer's nixpkgs (final).
+      overlays.default = final: prev: {
+        moon-crab =
+          removeAttrs self.packages.${final.stdenv.hostPlatform.system} [
+            "slssteam"
+            "slsteam-moon"
+            "default"
+          ]
+          // {
+            slssteam = final.callPackage ./nix/packages/slssteam.nix { };
+            slsteam-moon = final.callPackage ./nix/packages/slsteam-moon.nix { };
+          };
+      };
 
       nixosModules.default = nixosModule;
 
