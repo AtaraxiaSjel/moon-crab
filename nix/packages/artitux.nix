@@ -27,6 +27,10 @@ stdenv.mkDerivation {
   pname = "artitux";
   version = v.version;
 
+  # Keep the upstream #!/bin/sh shebang: the fixup-patched store-bash
+  # interpreter fails to start inside the steam runtime containers.
+  dontPatchShebangs = true;
+
   src = fetchFromGitHub {
     owner = v.owner;
     repo = v.repo;
