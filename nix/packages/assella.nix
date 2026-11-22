@@ -39,6 +39,7 @@ let
     meta = with lib; {
       description = "Steam game and depot management suite";
       homepage = "https://github.com/${v.owner}/${v.repo}";
+      maintainers = [ lib.maintainers.ataraxiasjel ];
       platforms = platforms.linux;
       mainProgram = pname;
     };
@@ -50,6 +51,7 @@ runCommand "${pname}-${v.version}"
     meta = {
       description = "Steam game and depot management suite";
       homepage = "https://github.com/${v.owner}/${v.repo}";
+      maintainers = [ lib.maintainers.ataraxiasjel ];
       platforms = [ "x86_64-linux" ];
       mainProgram = pname;
     };

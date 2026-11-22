@@ -70,6 +70,7 @@ let
       description = "SLSsteam fork with a native Lua manifest importer (slsteam-moon)";
       homepage = "https://github.com/${u.owner}/${u.repo}";
       license = lib.licenses.agpl3Only;
+      maintainers = [ lib.maintainers.ataraxiasjel ];
       platforms = [ "x86_64-linux" ];
     };
   };

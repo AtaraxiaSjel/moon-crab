@@ -58,6 +58,7 @@ stdenv.mkDerivation {
     description = "Lumen backend (slsteam-moon LuaTools stack)";
     homepage = "https://github.com/${u.owner}/${u.repo}";
     license = lib.licenses.unfree;
+    maintainers = [ lib.maintainers.ataraxiasjel ];
     platforms = [ "x86_64-linux" ];
   };
 }

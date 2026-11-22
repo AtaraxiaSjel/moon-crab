@@ -8,15 +8,27 @@
 # menu button ever appears. Native launch keeps full /proc visibility; the
 # audit env is still dropped (lumen.bin is a non-Steam process and must never
 # load the SLSsteam audit object).
-{ writeShellScriptBin }:
-writeShellScriptBin "lumen" ''
-  dir="$HOME/.local/share/Lumen"
-  if [ ! -x "$dir/lumen.bin" ]; then
-    echo "lumen: backend not installed (enable programs.moon-crab.luatools first)" >&2
-    exit 1
-  fi
-  cd "$dir" || exit 1
-  export LUMEN_BACKEND_DIR="$PWD/luatools/backend"
-  export LUMEN_LUA_DIR="$PWD/lua"
-  exec env -u LD_AUDIT -u LD_PRELOAD ./lumen.bin "$@"
-''
+{
+  lib,
+  writeShellScriptBin,
+}:
+let
+  entry = writeShellScriptBin "lumen" ''
+    dir="$HOME/.local/share/Lumen"
+    if [ ! -x "$dir/lumen.bin" ]; then
+      echo "lumen: backend not installed (enable programs.moon-crab.luatools first)" >&2
+      exit 1
+    fi
+    cd "$dir" || exit 1
+    export LUMEN_BACKEND_DIR="$PWD/luatools/backend"
+    export LUMEN_LUA_DIR="$PWD/lua"
+    exec env -u LD_AUDIT -u LD_PRELOAD ./lumen.bin "$@"
+  '';
+in
+entry.overrideAttrs {
+  meta = {
+    description = "Lumen backend launcher (slsteam-moon LuaTools stack)";
+    maintainers = [ lib.maintainers.ataraxiasjel ];
+    platforms = [ "x86_64-linux" ];
+  };
+}

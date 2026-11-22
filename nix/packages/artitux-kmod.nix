@@ -48,6 +48,7 @@ stdenv.mkDerivation {
     description = "artitux_kmod: per-process UMIP fixup and XCR0=0x7 kernel module for Artitux";
     homepage = "https://github.com/${v.owner}/${v.repo}";
     license = lib.licenses.gpl2Only;
+    maintainers = [ lib.maintainers.ataraxiasjel ];
     platforms = [ "x86_64-linux" ];
   };
 }

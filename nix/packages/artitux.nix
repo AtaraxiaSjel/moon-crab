@@ -95,6 +95,7 @@ stdenv.mkDerivation {
     description = "LD_PRELOAD runtime for Artifact releases: Artitux.so plus its launcher";
     homepage = "https://github.com/${v.owner}/${v.repo}";
     license = lib.licenses.agpl3Only;
+    maintainers = [ lib.maintainers.ataraxiasjel ];
     platforms = [ "x86_64-linux" ];
     mainProgram = "artitux";
   };
